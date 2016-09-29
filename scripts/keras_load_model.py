@@ -64,7 +64,7 @@ def main(inFile,outFile,modelWeight,modelJson):
     loaded_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     score = loaded_model.evaluate(X, Y, verbose=0)
     logging.info('RESULTS FOR EVALUATE')
-    print "%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100)
+    print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
 
 
     logging.info("MY TEST OF PREDICTION POWER")
