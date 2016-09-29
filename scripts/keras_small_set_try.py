@@ -74,7 +74,7 @@ def main(inFile,outFile,numFold,numEpoch):
         model.fit(X[train], Y[train], nb_epoch=numEpoch, batch_size=10)
         #   model.fit(X, Y, nb_epoch=70, batch_size=10,validation_data=(X_val,Y_val)) in quello sopra NON faccio il conto sul validation ad ogni epoch
         # evaluate the model
-        logging.info("RESULT OF RUN N. %i WITH EVALUATE:"epoch_num)
+        logging.info("RESULT OF RUN N. %i WITH EVALUATE:"%epoch_num)
         scores = model.evaluate(X[test], Y[test], verbose=0)
         print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
         cvscores.append(scores[1] * 100)
@@ -82,7 +82,7 @@ def main(inFile,outFile,numFold,numEpoch):
         predictions = model.predict(X[test],verbose=1)
         # round predictions
         rounded = [round(x) for x in predictions]
-        logging.info("MY TEST OF PREDICTION POWER FOR RUN N. %i"epoch_num)
+        logging.info("MY TEST OF PREDICTION POWER FOR RUN N. %i"%epoch_num)
         right=0
         wrong=0
         j=0
