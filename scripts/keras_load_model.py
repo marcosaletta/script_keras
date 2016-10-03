@@ -69,7 +69,8 @@ def main(inFile,outFile,modelWeight,modelJson):
 
     logging.info("MY TEST OF PREDICTION POWER")
     predictions = loaded_model.predict(X,verbose=1)
-    rounded = [round(x) for x in predictions]
+#    rounded = [round(x) for x in predictions]
+    rounded = numpy.around(predictions.astype(numpy.double),0)
     #USARE QUESTI PER LA SCRITTURA DEL FILE CON LE PREVISIONI
     right=0
     wrong=0

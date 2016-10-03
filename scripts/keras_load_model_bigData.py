@@ -8,6 +8,7 @@ from sklearn.cross_validation import StratifiedKFold
 import numpy
 from keras.models import model_from_json
 import random
+from datetime import datetime
 
 # fix random seed for reproducibility
 seed = 7
@@ -58,33 +59,44 @@ def main(inFile,outFile,modelWeight,modelJson):
     logging.info("COMPILING MODEL")
     loaded_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     file_user=open(inFile,'r')
-    fo=open(outFile, "w") as fo:
+    fo=open(outFile, "w")
+    sttime = datetime.now().strftime('%Y%m%d_%H:%M:%S - ')
+    fo.write(sttime,"START")
     evaluate=True
     right=0
     wrong=0
     for line in file_user:
         array=numpy.fromstring(line, sep=',')
     # split into input (X) and output (Y) variables
-        if len(array)==70:
-            X = array[0:69]
-            Y = array[70]
+        if len(array)==71:
+            X = numpy.array([array[1:70]])
+            Y = numpy.array([array[70]])
         else:
-            X = array[0:69]
-            evaluate=False
+            X = numpy.array([array[1:71]])
+        code=array[0]
+        evaluate=False
         predictions = loaded_model.predict(X,verbose=1)
-        to_write = [round(x) for x in predictions]
-        if evaluate==True
-            if to_write==Y:
+#        predictions = loaded_model.predict_on_batch(X)
+#        to_write = [round(x) for x in predictions]
+        to_write=numpy.around(predictions,decimals=0,out=None)
+        if evaluate==True:
+            print(Y)
+            print(to_write)
+            if to_write==Y[0]:
                 right+=1
             else:
                 wrong+=1
 #        print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
     #USARE QUESTI PER LA SCRITTURA DEL FILE CON LE PREVISION
         else:
-            fo.write(to_write+"\n")
+            fo.write(str(code,',',to_write[0])+"\n")
     if evaluate==True:
-        perc_right=float(right)/float((right+wrong))
+        perc_right=float(right)/float(right+wrong)
         fo.write("Right:"+str(right)+"\nWrong:"+str(wrong)+"\nPercentual:"+str(perc_right))
+    sttime = datetime.now().strftime('%Y%m%d_%H:%M:%S - ')
+    fo.write(sttime,"END")
+    fo.close()
+    file_user.close()
 
 
 
