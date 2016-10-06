@@ -66,12 +66,13 @@ def main(inFile,outFile,modelWeight,modelJson):
     logging.info('RESULTS FOR EVALUATE')
     print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
 
-
+    """
     logging.info("MY TEST OF PREDICTION POWER")
     predictions = loaded_model.predict(X,verbose=1)
 #    rounded = [round(x) for x in predictions]
-    rounded = numpy.around(predictions.astype(numpy.double),0)
+    rounded=numpy.around(predictions,decimals=0,out=None)
     #USARE QUESTI PER LA SCRITTURA DEL FILE CON LE PREVISIONI
+
     right=0
     wrong=0
     j=0
@@ -86,15 +87,15 @@ def main(inFile,outFile,modelWeight,modelJson):
     print("right:",right)
     print("wrong:",wrong)
     print("Percentual:",perc_right)
-
+    """
     #results
 
     with open(outFile, "w") as fo:
         fo.write('Results for evaluate\n')
         fo.write("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
-        fo.write('Results for predictions\n')
+"""        fo.write('Results for predictions\n')
         fo.write("Right:"+str(right)+"\nWrong:"+str(wrong)+"\nPercentual:"+str(perc_right))
-
+"""
 
 
 

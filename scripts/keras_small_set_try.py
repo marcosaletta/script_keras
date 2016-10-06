@@ -45,10 +45,11 @@ def main(inFile,outFile,numFold,numEpoch):
     logging.info("START")
     logging.info("LOADING THE DATA SET")
 #    print(inFile)
-    dataset = numpy.loadtxt(inFile, delimiter=",")
+    dataset = numpy.loadtxt(inFile, delimiter=",",skiprows=1)
     # split into input (X) and output (Y) variables
-    X = dataset[:,0:69]
-    Y = dataset[:,69]
+    len=dataset.shape[1]
+    X = dataset[:,0:len-1]
+    Y = dataset[:,len-1]
     #k-fold cross validation
 #    print(type(numFold))
     logging.info("SPLITTING SAMPLE FOR CROSS-VALIDATION WITH %i FOLD"%numFold)
@@ -62,9 +63,9 @@ def main(inFile,outFile,numFold,numEpoch):
         epoch_num+=1
         # create model
         model = Sequential()
-        model.add(Dense(80, input_dim=69, init='uniform', activation='relu'))
-        model.add(Dense(69, init='uniform', activation='relu'))
-        model.add(Dense(69, init='uniform', activation='relu'))
+        model.add(Dense(len+10, input_dim=len-1, init='uniform', activation='relu'))
+        model.add(Dense(len-1, init='uniform', activation='relu'))
+        model.add(Dense(len-1, init='uniform', activation='relu'))
 
         #model.add(Dense(290, init='uniform', activation='relu'))
         model.add(Dense(1, init='uniform', activation='sigmoid'))
@@ -79,9 +80,11 @@ def main(inFile,outFile,numFold,numEpoch):
         print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
         cvscores.append(scores[1] * 100)
         # calculate predictions
+        """
         predictions = model.predict(X[test],verbose=1)
         # round predictions
-        rounded = [round(x) for x in predictions]
+#        rounded = [round(x) for x in predictions]
+        rounded = numpy.around(predictions.astype(numpy.double),0)
         logging.info("MY TEST OF PREDICTION POWER FOR RUN N. %i"%epoch_num)
         right=0
         wrong=0
@@ -96,21 +99,21 @@ def main(inFile,outFile,numFold,numEpoch):
         print("right:",right)
         print("wrong:",wrong)
         print("Percentual:",perc_right)
-        csvpred.append(perc_right)
-
+        csvpred.append(perc_right)}
+        """
 #printing out mean and std
     logging.info("TOTAL RESULTS")
     logging.info("MEAN AND STANDARD DEVIATION")
     logging.info('RESULTS FOR EVALUATE')
     print("%.2f%% (+/- %.2f%%)")% (numpy.mean(cvscores), numpy.std(cvscores))
-    logging.info('RESULTS FOR MY TEST')
-    print("%.2f%% (+/- %.2f%%)" )% (numpy.mean(csvpred), numpy.std(csvpred))
+#    logging.info('RESULTS FOR MY TEST')
+#    print("%.2f%% (+/- %.2f%%)" )% (numpy.mean(csvpred), numpy.std(csvpred))
 
     with open(outFile, "w") as fo:
         fo.write('Results for evaluate\n')
         fo.write("%.2f%% (+/- %.2f%%)\n"% (numpy.mean(cvscores), numpy.std(cvscores)))
-        fo.write('Results for predictions\n')
-        fo.write("%.2f%% (+/- %.2f%%)\n"% (numpy.mean(csvpred), numpy.std(csvpred)))
+#        fo.write('Results for predictions\n')
+#        fo.write("%.2f%% (+/- %.2f%%)\n"% (numpy.mean(csvpred), numpy.std(csvpred)))
 
 
 # serialize model to JSON
