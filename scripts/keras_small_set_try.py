@@ -105,7 +105,7 @@ def main(inFile,outFile,numFold,numEpoch):
     logging.info("TOTAL RESULTS")
     logging.info("MEAN AND STANDARD DEVIATION")
     logging.info('RESULTS FOR EVALUATE')
-    print("%.2f%% (+/- %.2f%%)")% (numpy.mean(cvscores), numpy.std(cvscores))
+    print("%.2f%% (+/- %.2f%%)"% (numpy.mean(cvscores), numpy.std(cvscores)))
 #    logging.info('RESULTS FOR MY TEST')
 #    print("%.2f%% (+/- %.2f%%)" )% (numpy.mean(csvpred), numpy.std(csvpred))
 
