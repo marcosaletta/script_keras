@@ -61,6 +61,7 @@ def CreateList(rf,nn,svm):
         code, pred =SplitLine(item)
         codes.append(code)
         preds.append(pred.strip('[]').strip('.]\n').strip())
+    print("------------------------",line_rf)
     return line_rf, codes, preds
 
 
@@ -76,18 +77,20 @@ def PrintResult(codes,preds,out,err):
         for key in counter_codes.keys():
             code=key
     if counter_preds['1']>counter_preds['0']:
-        sex='F'
+#        sex='F'
+        sex=1
         agr=counter_preds['1']
     elif counter_preds['1']<counter_preds['0']:
-        sex='M'
+#        sex='M'
+        sex=0
         agr=counter_preds['0']
     else:
         sex="NONE"
     if sex!="NONE":
-        out.write(code+','+sex+','+str(agr)+'\n')
+        out.write(code+','+str(sex)+','+str(agr)+'\n')
         print("SESSO:",sex,"AGR:",str(agr))
     else:
-        err.write(code+','+sex+'\n')
+        err.write(code+','+str(sex)+'\n')
 
     print("Counter:",counter_preds)
     print(preds)
@@ -102,12 +105,15 @@ def main(PredRF,PredNN,PredSVM,outFile):
     logging.info("START")
     logging.info("PREPARING ALL THE FILES")
     with open(PredRF,'r') as rf, open(PredNN,'r') as nn, open(PredSVM,'r') as svm, open(outFile,'w') as out, open(outFile+'_erors','w') as err:
-        line_rf=rf.readline()
+#        line_rf=rf.readline()
+        line_rf="INIZIO"
         logging.info("THE EOF FILE IS BASED ON THE RF FILE")
         logging.info("READ FIRST LINE FOR RF")
         while line_rf!="FINE":
             line_rf, codes, preds = CreateList(rf,nn,svm)
-            PrintResult(codes,preds,out,err)
+            if line_rf!="FINE":
+                PrintResult(codes,preds,out,err)
+            #print("linerf",line_rf)
     logging.info("END")
 
 

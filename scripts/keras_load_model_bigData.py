@@ -31,6 +31,7 @@ def usage(msg):
    print("Usage: %s -o file output" % sys.argv[0])
    print("Usage: %s -w model file (model.h5)" % sys.argv[0])
    print("Usage: %s -j json model file (model.json)" % sys.argv[0])
+   print("Usage: %s -s if file as sex flag (1, evaluate) or not (0, prediction) (model.json)" % sys.argv[0])
    print("Usage: %s -h help\n" % sys.argv[0])
    print("Example:python %s -f /home/marco/working-dir/Krux/anagrafica_files/v2/List4Keras_ALL_aud_200916_FEW_FEATURES_valid_10K4test_loadModel -o ../results/test_load_model_small_set -w ../models/model.h5_small_set -j ../models/model.json_small_set  \n"%sys.argv[0])
    raise SystemExit
@@ -70,8 +71,14 @@ def main(inFile,outFile,modelWeight,modelJson,wSex):
     print("Loop start")
     for line in file_user:
 #        print(line)
-        first_split=line.split("|")
-        array=numpy.fromstring(first_split[1], sep=',')
+        try:
+            first_split=line.split("|")
+            code=first_split[0]
+            split=first_split[1]
+        except IndexError:
+            code="NONE"
+            split=line
+        array=numpy.fromstring(split, sep=',')
         len_array=len(array)
     # split into input (X) and output (Y) variables
         if wSex==1:
@@ -80,7 +87,7 @@ def main(inFile,outFile,modelWeight,modelJson,wSex):
         else:
             X = numpy.array([array[0:len_array]])
             evaluate=False
-        code=first_split[0]
+#        code=first_split[0]
 #        print(X)
         predictions = loaded_model.predict(X,verbose=1)
 #        predictions = loaded_model.predict_on_batch(X)
@@ -93,13 +100,17 @@ def main(inFile,outFile,modelWeight,modelJson,wSex):
                 right+=1
             else:
                 wrong+=1
+            fo.write(str(code)+','+str(to_write[0])+"\n")
 #        print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
     #USARE QUESTI PER LA SCRITTURA DEL FILE CON LE PREVISION
         else:
             fo.write(str(code)+','+str(to_write[0])+"\n")
     if evaluate==True:
         perc_right=float(right)/float(right+wrong)
-        fo.write("Right:"+str(right)+"\nWrong:"+str(wrong)+"\nPercentual:"+str(perc_right))
+        #fo.write(str(code)+','+str(to_write[0])+"\n")
+        #fo_eval=open(outFile+'_eval', "w")
+#        fo.write("Right:"+str(right)+"\nWrong:"+str(wrong)+"\nPercentual:"+str(perc_right))
+        print("Right:"+str(right)+"\nWrong:"+str(wrong)+"\nPercentual:"+str(perc_right))
     sttime = datetime.now().strftime('%Y%m%d_%H:%M:%S - ')
     fo.write("END:"+str(sttime))
     fo.close()
