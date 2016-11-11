@@ -1,3 +1,5 @@
 python keras_small_set_try.py -f /home/marco/working-dir/Krux/anagrafica_files/v2/run_2/List4Keras_ALL_10k_train_69_list_train_r2 -o ../results/100K4valid_69feat_r2 -k 10 -e 70
 
 python LoadModelSVC_v2.py -f /home/marco/working-dir/Krux/anagrafica_files/v2/run_2/List4Keras_ALL_1k_train_69_list_valid_r2 -o ../results/run_3_RandClass/test_object -m ../results/run_3_RandClass/test_1000_model.pkl -s 1 -t RandomForest
+
+python LoadModelSVC_or_RandClass_luigi.py TestTask --model /home/marco/working-dir/Keras/results/run_3_RandClass4Luigi/RandClass_10k_train_69_list_train_model.pkl --inFile /home/marco/working-dir/Krux/anagrafica_files/v2/UserWithSex_online/lists_users_WITH_SEX_1000 --outFile /home/marco/working-dir/Keras/results/test_parallel/test_par_RandomForest_sex_online_1001  --wSex 1 --ModelType Forest --workers 4

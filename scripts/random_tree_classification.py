@@ -10,6 +10,9 @@ import time
 from sklearn.cross_validation import StratifiedKFold
 import random
 from sklearn.externals import joblib
+import pickle as pickle
+import luigi
+
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 seed = 7
@@ -60,7 +63,7 @@ def main(inFile,outFile,numFold,numTree):
     for i, (train, test) in enumerate(kfold):
         logging.info("-------FOLD N. %i ---------"%i)
         logging.info("PREPARING MODEL")
-        model = RandomForestClassifier(n_jobs=1,max_features=2,n_estimators=numTree)
+        model = RandomForestClassifier(n_jobs=-1,max_features=2,n_estimators=numTree,max_depth=10)
         model.fit(X[train], Y[train])
         results=model.score(X[test],Y[test])
         logging.info("RESULTS FOR FOLD %i: %.2f%%"%(i,results*100))
@@ -79,8 +82,14 @@ def main(inFile,outFile,numFold,numTree):
         fo.write('Results for evaluate\n')
         fo.write("%.2f%% (+/- %.2f%%)\n"% (numpy.mean(cvscores), numpy.std(cvscores)))
         fo.write(str(time.clock()-start_time)+"seconds\n")
-    logging.info("WRITING THE BEST MODEL (FOLD %i) TO FILE"%best_fold)
-    joblib.dump(model2save, outFile+'_model.pkl')
+        logging.info("WRITING THE BEST MODEL (FOLD %i) TO FILE"%best_fold)
+#    joblib.dump(model2save, outFile+'_model.pkl')
+    print(type(model2save))
+    with open(outFile+'_model.pickle', "wb") as foval:
+        pickle.dump(model2save, foval)
+    picluigi=luigi.LocalTarget(outFile+'_model_luigi.pickle',format=luigi.format.Nop).open('w')
+    pickle.dump(model2save, picluigi)
+    picluigi.close()
     logging.info("END")
 
     print(time.clock() - start_time, "seconds")

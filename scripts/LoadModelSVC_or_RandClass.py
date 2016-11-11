@@ -151,7 +151,7 @@ def main(inFile,outFile,model,wSex,ModelType):
     pos=0
     for line in file_user:
         pos+=1
-        print("Sono alla linea %i"%pos)
+#        print("Sono alla linea %i"%pos)
         line_proc=PrepareLine(line,wSex)
         skipp=line_proc.SplitLine()
         if skipp==-1:
@@ -187,7 +187,7 @@ if __name__=="__main__":
         outFile=str(opts['-o'])
     if '-s' in opts:
         wSex=int(opts['-s'])
-    if '-s' in opts:
+    if '-t' in opts:
         ModelType=str(opts['-t'])
     if '-h' in opts:
         usage('msg')
