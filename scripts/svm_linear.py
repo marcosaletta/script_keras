@@ -9,6 +9,7 @@ import random
 from sklearn.externals import joblib
 import pickle
 import time
+import luigi
 
 # fix random seed for reproducibility
 seed = 7
@@ -38,7 +39,7 @@ def usage(msg):
 
 #####################################################################
 
-def main(inFile,outFile,numFold,numEpoch):
+def main(inFile,outFile,numFold):
     start_time = time.clock()
     logging.info("START")
     logging.info("LOADING THE DATA SET")
@@ -79,7 +80,10 @@ def main(inFile,outFile,numFold,numEpoch):
         fo.write("%.2f%% (+/- %.2f%%)\n"% (numpy.mean(cvscores), numpy.std(cvscores)))
         fo.write(str(time.clock()-start_time)+"seconds\n")
     logging.info("WRITING THE BEST MODEL (FOLD %i) TO FILE"%best_fold)
-    joblib.dump(model2save, outFile+'_model.pkl')
+    #joblib.dump(model2save, outFile+'_model.pkl')
+    picluigi=luigi.LocalTarget(outFile+'_model_luigi.pickle',format=luigi.format.Nop).open('w')
+    pickle.dump(model2save, picluigi)
+    picluigi.close()
     logging.info("END")
 
 
@@ -102,10 +106,10 @@ if __name__=="__main__":
        outFile=str(opts['-o'])
     if '-k' in opts:
         numFold=int(opts['-k'])
-    if '-e' in opts:
-        numEpoch=int(opts['-e'])
+    # if '-e' in opts:
+    #     numEpoch=int(opts['-e'])
     if '-h' in opts:
        usage('msg')
-    if '-f' not in opts and '-o' not in opts and '-k' not in opts and '-e' not in opts and '-h' not in opts:
+    if '-f' not in opts and '-o' not in opts and '-k' not in opts and '-h' not in opts:
         usage('0')
-    main(inFile,outFile,numFold,numEpoch)
+    main(inFile,outFile,numFold)

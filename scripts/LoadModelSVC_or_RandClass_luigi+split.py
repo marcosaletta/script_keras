@@ -98,20 +98,25 @@ class Analize(luigi.Task):
     wSex = luigi.Parameter()
 
     def MakePred(self):
+        start_pred = time.clock()
         predictions = self.loaded_model.predict(self.X)
-        if self.ModelType=="SVC":
-            score=self.loaded_model.decision_function(self.X)
-            score=str(int(numpy.around(score,out=None)))
-        else:
-            score=self.loaded_model.predict_proba(self.X)
-            score=str((numpy.amax(numpy.around(score,decimals=3,out=None))))
+        # if self.ModelType=="SVC":
+        #     score=self.loaded_model.decision_function(self.X)
+        #     score=str(int(numpy.around(score,out=None)))
+        # else:
+        #     score=self.loaded_model.predict_proba(self.X)
+        #     score=str((numpy.amax(numpy.around(score,decimals=3,out=None))))
+        score="NONE"
         if self.wSex==str(1):
             results=self.loaded_model.score(self.X,self.Y)
             #self.cvscores.append(results* 100)
             #results.append(self.cvscores)
+            #logging.info('++++++++++++++++++++++++++++pred executed in %.2f sec'%(time.clock() - start_pred))
             return predictions, score, results
         else:
+            #logging.info('++++++++++++++++++++++++++++pred executed in %.2f sec'%(time.clock() - start_pred))
             return predictions, score
+        logging.info('++++++++++++++++++++++++++++pred executed in %.2f sec'%(time.clock() - start_pred))
 
 class PrintResult(luigi.Task):
     """Class to print analisys results"""
@@ -168,7 +173,7 @@ class TestTask(luigi.Task):
     def output(self):
         #pid=luigi.Parameter()
         #return luigi.LocalTarget(self.outFile), luigi.LocalTarget(self.outFile+'_eval'), luigi.LocalTarget(self.outFile+'_tup_'+str(os.getpid()))
-        return luigi.LocalTarget(self.outFile), luigi.LocalTarget(self.outFile+'_eval'), luigi.LocalTarget(self.outFile+'_tup_'+os.path.basename(self.File))
+        return luigi.LocalTarget(self.outFile+os.path.basename(self.File)), luigi.LocalTarget(self.outFile+'_eval_'+os.path.basename(self.File)), luigi.LocalTarget(self.outFile+'_tup_'+os.path.basename(self.File))
         #return luigi.LocalTarget(self.outFile), luigi.LocalTarget(self.outFile+'_eval'), luigi.LocalTarget(self.outFile+'_tup_'+str(self.pid))
 
     # def run(self):
@@ -212,6 +217,7 @@ class TestTask(luigi.Task):
         print("Loop start")
         pos=0
         for line in file_user:
+            start_loop = time.clock()
             pos+=1
             #print(line)
             line_proc=PrepareLine(line,self.wSex)
@@ -227,6 +233,7 @@ class TestTask(luigi.Task):
             ToPrint.PrintPred()
             if len(tupPred)==3:
                 cvscores.append(tupPred[2])
+            #logging.info('++++++++++++++++++++++++++++loop executed in %.2f sec'%(time.clock() - start_loop))
         if len(tupPred)==3:
             logging.info("PRINTING EVALUATION")
             ToPrint.PrintEval()
