@@ -19,8 +19,8 @@ numpy.random.seed(seed)
 argparser = argparse.ArgumentParser(add_help=True)
 argparser.add_argument('-i','--infile', type=str, help=('csv with data in input'), required=True)
 argparser.add_argument('-o','--outfile', type=str, help=('csv with results in output'), required=True)
-argparser.add_argument('-f','--fold', type=str, help=('Number of folds'), required=True)
-argparser.add_argument('-e','--epoch', type=str, help=('Number of epoch'), required=True)
+argparser.add_argument('-f','--fold', type=int, help=('Number of folds'), required=True)
+argparser.add_argument('-e','--epoch', type=int, help=('Number of epoch'), required=True)
 argparser.add_argument('-p',"--pred", help="Make evalutaion of the model also using predictions",action="store_true")
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -31,17 +31,22 @@ logger = logging.getLogger("START")
 
 
 def LoadDataset(inFile):
-    dataset = numpy.loadtxt(inFile, delimiter=",",skiprows=1)
+    dataset = numpy.loadtxt(inFile,skiprows=1,delimiter="|",usecols=[1,2,3,4,5,6,7,8,9,10,11,12,13])
+    label = numpy.loadtxt(inFile,skiprows=1,delimiter="|",usecols=[0],dtype=numpy.str)
+    #dataset = numpy.genfromtxt(inFile, delimiter="|",skiprows=1,dtype=None)#{'names': ('kwd', 'm1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11','m12', 'evergreen'),'formats': ('S1','f2','f2','f2','f2','f2','f2','f2','f2','f2','f2','f2','f2','i1')})
     # split into input (X) and output (Y) variables
+    print(dataset.shape)
     len=dataset.shape[1]
     X = dataset[:,0:len-1]
     Y = dataset[:,len-1]
-    return X, Y
+    print(X.shape)
+    return X, Y, len
 
-def KFolder(numFold):
+def KFolder(numFold,Y):
     return StratifiedKFold(y=Y, n_folds=numFold, shuffle=True, random_state=seed)
 
-def CreateModel(cvscores,epoch_num,train,test):
+def CreateModel(cvscores,epoch_num,train,test,len,X,Y,numEpoch,model2save):
+#    logging.info("EPOCH NUMBER: %i"%epoch_num)
     model = Sequential()
     model.add(Dense(len+10, input_dim=len-1, init='uniform', activation='relu'))
     model.add(Dense(len-1, init='uniform', activation='relu'))
@@ -124,18 +129,19 @@ def main(argv):
     numEpoch = args.epoch
     MakePred=args.pred
     logging.info("LOADING THE DATA SET")
-    X,Y = LoadDataset(inFile)
+    X,Y,len = LoadDataset(inFile)
     logging.info("SPLITTING SAMPLE FOR CROSS-VALIDATION WITH %i FOLD"%numFold)
-    kfold = KFolder(numFold)
+    kfold = KFolder(numFold,Y)
     cvscores = []
     csvpred = []
+    model2save=0
     logging.info("STARTING WITH CROSS-VALIDATION")
     epoch_num=0
     for i, (train, test) in enumerate(kfold):
-        logging.info("START EPOCH NUM %i"%epoch_num)
         epoch_num+=1
+        logging.info("START EPOCH NUM %i"%epoch_num)
 # create model
-        cvscores, model2save = CreateModel(cvscores,epoch_num,train,test)
+        cvscores, model2save = CreateModel(cvscores,epoch_num,train,test,len,X,Y,numEpoch,model2save)
         if MakePred:
             csvpred=ModelPredictions(csvpred)
 #printing out mean and std
