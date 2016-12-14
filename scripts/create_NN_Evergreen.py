@@ -8,7 +8,7 @@ import numpy
 from keras.models import model_from_json
 import random
 import argparse
-
+from datetime import datetime
 
 
 
@@ -111,7 +111,7 @@ def PrintResults(cvscores,csvpred,MakePred,outFile):
             fo.write("%.2f%% (+/- %.2f%%)\n"% (numpy.mean(csvpred), numpy.std(csvpred)))
 
 def SaveBestModel(model2save,outFile):
-    logging.info("SAVING MODEL IN model.json AND model.h5")
+    logging.info("SAVING MODEL IN %s model.json AND %s"%(outFile+"_model.json",outFile+"_model.h5"))
     model_json = model2save.to_json()
     with open(outFile+"_model.json", "w") as json_file:
         json_file.write(model_json)
@@ -121,6 +121,7 @@ def SaveBestModel(model2save,outFile):
 
 
 def main(argv):
+    start_time = datetime.now()
     logging.info("START")
     args = argparser.parse_args()
     inFile = args.infile
@@ -148,6 +149,7 @@ def main(argv):
     PrintResults(cvscores,csvpred,MakePred,outFile)
 # serialize model to JSON
     SaveBestModel(model2save,outFile)
+    logging.info("EXECUTED IN %f SEC"%((datetime.now()-start_time)).total_seconds())
     logging.info("END")
 
 
