@@ -31,26 +31,42 @@ logger = logging.getLogger("START")
 
 
 def LoadDataset(inFile):
-    dataset = numpy.loadtxt(inFile,skiprows=1,delimiter="|",usecols=[1,2,3,4,5,6,7,8,9,10,11,12,13])
     label = numpy.loadtxt(inFile,skiprows=1,delimiter="|",usecols=[0],dtype=numpy.str)
+    dataset = numpy.loadtxt(inFile,skiprows=1,delimiter="|",usecols=range(1,13))
+    ever = numpy.loadtxt(inFile,skiprows=1,delimiter="|",usecols=[13],dtype=numpy.str)
     #dataset = numpy.genfromtxt(inFile, delimiter="|",skiprows=1,dtype=None)#{'names': ('kwd', 'm1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11','m12', 'evergreen'),'formats': ('S1','f2','f2','f2','f2','f2','f2','f2','f2','f2','f2','f2','f2','i1')})
-    # split into input (X) and output (Y) variables
-    print(dataset.shape)
-    len=dataset.shape[1]
-    X = dataset[:,0:len-1]
-    Y = dataset[:,len-1]
-    print(X.shape)
-    return X, Y, len
+    # split into input (X) and output (Y) variables)
+    leng=dataset.shape[1]
+    X = dataset[:,0:leng]
+    #X=dataset
+    #Y_let = dataset[:,len-1]
+    tmp=[]
+    print(type(ever))
+    print(type(X))
+    ever[ever=="b'E'"]=numpy.array([1])
+    ever[ever=="b's'"]=numpy.array([0])
+    Y=ever
+    # for i,val in numpy.ndenumerate(ever):
+    #     #print(type(val))
+    #     #print(val)
+    #     if val=="E":
+    #         tmp.append(1)
+    #     else:
+    #         tmp.append(0)
+    # Y=numpy.array(tmp)
+    print(Y)
+    print(X[1])
+    return X, Y, leng
 
 def KFolder(numFold,Y):
     return StratifiedKFold(y=Y, n_folds=numFold, shuffle=True, random_state=seed)
 
-def CreateModel(cvscores,epoch_num,train,test,len,X,Y,numEpoch,model2save):
+def CreateModel(cvscores,epoch_num,train,test,leng,X,Y,numEpoch,model2save):
 #    logging.info("EPOCH NUMBER: %i"%epoch_num)
     model = Sequential()
-    model.add(Dense(len+10, input_dim=len-1, init='uniform', activation='relu'))
-    model.add(Dense(len-1, init='uniform', activation='relu'))
-    model.add(Dense(len-1, init='uniform', activation='relu'))
+    model.add(Dense(leng+10, input_dim=leng, init='uniform', activation='relu'))
+    model.add(Dense(leng, init='uniform', activation='relu'))
+    model.add(Dense(leng, init='uniform', activation='relu'))
 
     #model.add(Dense(290, init='uniform', activation='relu'))
     model.add(Dense(1, init='uniform', activation='sigmoid'))
@@ -130,7 +146,7 @@ def main(argv):
     numEpoch = args.epoch
     MakePred=args.pred
     logging.info("LOADING THE DATA SET")
-    X,Y,len = LoadDataset(inFile)
+    X,Y,leng = LoadDataset(inFile)
     logging.info("SPLITTING SAMPLE FOR CROSS-VALIDATION WITH %i FOLD"%numFold)
     kfold = KFolder(numFold,Y)
     cvscores = []
@@ -142,7 +158,7 @@ def main(argv):
         epoch_num+=1
         logging.info("START EPOCH NUM %i"%epoch_num)
 # create model
-        cvscores, model2save = CreateModel(cvscores,epoch_num,train,test,len,X,Y,numEpoch,model2save)
+        cvscores, model2save = CreateModel(cvscores,epoch_num,train,test,leng,X,Y,numEpoch,model2save)
         if MakePred:
             csvpred=ModelPredictions(csvpred)
 #printing out mean and std
